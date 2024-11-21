@@ -1,0 +1,49 @@
+// server/index.js
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// MongoDB Connection
+mongoose.connect("YOUR_MONGODB_CONNECTION_STRING", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+// Player Schema
+const playerSchema = new mongoose.Schema({
+  name: String,
+  life: Number,
+  poison: Number,
+});
+
+const Player = mongoose.model("Player", playerSchema);
+
+// API Endpoints
+app.get("/players", async (req, res) => {
+  const players = await Player.find();
+  res.json(players);
+});
+
+app.post("/players", async (req, res) => {
+  const newPlayer = new Player(req.body);
+  await newPlayer.save();
+  res.json(newPlayer);
+});
+
+app.put("/players/:id", async (req, res) => {
+  const updatedPlayer = await Player.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
+  res.json(updatedPlayer);
+});
+
+// Start server
+app.listen(3001, () => {
+  console.log("Server running on http://localhost:3001");
+});
